@@ -1,6 +1,5 @@
 try:
-    from firebolt.db import connect
-    from firebolt.client import DEFAULT_API_URL
+    from firebolt_db.firebolt_connector import Connection
     enabled = True
 except ImportError:
     enabled = False
@@ -20,14 +19,14 @@ class Firebolt(BaseQueryRunner):
         return {
             "type": "object",
             "properties": {
-                "api_endpoint": {"type": "string", "default": DEFAULT_API_URL},
-                "engine_name": {"type": "string"},
+                "host": {"type": "string", "default": "localhost"},
+                "port": {"type": "string", "default": 8123},
                 "DB": {"type": "string"},
                 "user": {"type": "string"},
                 "password": {"type": "string"},
             },
-            "order": ["user", "password", "api_endpoint", "engine_name", "DB"],
-            "required": ["user", "password", "engine_name", "DB"],
+            "order": ["host", "port", "user", "password", "DB"],
+            "required": ["user","password"],
             "secret": ["password"],
         }
 
@@ -36,12 +35,12 @@ class Firebolt(BaseQueryRunner):
         return enabled
 
     def run_query(self, query, user):
-        connection = connect(
-            api_endpoint=(self.configuration.get("api_endpoint") or DEFAULT_API_URL),
-            engine_name=(self.configuration.get("engine_name") or None),
+        connection = Connection(
+            host=self.configuration["host"],
+            port=self.configuration["port"],
             username=(self.configuration.get("user") or None),
             password=(self.configuration.get("password") or None),
-            database=(self.configuration.get("DB") or None),
+            db_name=(self.configuration.get("DB") or None),
         )
 
         cursor = connection.cursor()

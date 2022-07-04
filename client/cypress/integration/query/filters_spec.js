@@ -68,35 +68,9 @@ describe("Query Filters", () => {
     }
 
     it("filters rows in a Table Visualization", () => {
-      // Defaults to All Options Selected
-
-      expectSelectedOptionsToHaveMembers(["a", "b", "c"]);
-      expectTableToHaveLength(11);
-      expectFirstColumnToHaveMembers(["a", "a", "a", "a", "b", "b", "b", "c", "c", "c", "c"]);
-
-      // Clear Option
-
-      cy.getByTestId("FilterName-stage1::multi-filter")
-        .find(".ant-select-selector")
-        .click();
-      cy.getByTestId("ClearOption").click();
-      cy.getByTestId("FilterName-stage1::multi-filter").click(); // close dropdown
-
-      cy.getByTestId("TableVisualization").should("not.exist");
-
-      // Single Option selected
-
-      cy.getByTestId("FilterName-stage1::multi-filter")
-        .find(".ant-select-selector")
-        .click();
-      cy.contains(".ant-select-item-option-grouped > .ant-select-item-option-content", "a").click();
-      cy.getByTestId("FilterName-stage1::multi-filter").click(); // close dropdown
-
       expectSelectedOptionsToHaveMembers(["a"]);
       expectTableToHaveLength(4);
       expectFirstColumnToHaveMembers(["a", "a", "a", "a"]);
-
-      // Two Options selected
 
       cy.getByTestId("FilterName-stage1::multi-filter")
         .find(".ant-select-selector")
@@ -107,6 +81,16 @@ describe("Query Filters", () => {
       expectSelectedOptionsToHaveMembers(["a", "b"]);
       expectTableToHaveLength(7);
       expectFirstColumnToHaveMembers(["a", "a", "a", "a", "b", "b", "b"]);
+
+      // Clear Option
+
+      cy.getByTestId("FilterName-stage1::multi-filter")
+        .find(".ant-select-selector")
+        .click();
+      cy.getByTestId("ClearOption").click();
+      cy.getByTestId("FilterName-stage1::multi-filter").click(); // close dropdown
+
+      cy.getByTestId("TableVisualization").should("not.exist");
 
       // Select All Option
 

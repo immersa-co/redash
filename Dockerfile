@@ -64,7 +64,7 @@ RUN apt-get update && \
 
 
 ARG TARGETPLATFORM
-ARG databricks_odbc_driver_url=https://databricks.com/wp-content/uploads/2.6.10.1010-2/SimbaSparkODBC-2.6.10.1010-2-Debian-64bit.zip
+ARG databricks_odbc_driver_url=https://www.databricks.com/wp-content/uploads/2.6.10.1010-2/SimbaSparkODBC-2.6.10.1010-2-Debian-64bit.zip
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list \

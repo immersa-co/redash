@@ -5,20 +5,20 @@ logger = logging.getLogger(__name__)
 
 _PENDING, _STARTED, _SUCCESS, _FAILURE, _CANCELLED = 1, 2, 3, 4, 5
 
-class RedashEndpoint(BaseQueryRunner):
+class RemoteRedash(BaseQueryRunner):
     should_annotate_query = False
 
     def __init__(self, configuration):
-        super(RedashEndpoint, self).__init__(configuration)
+        super(RemoteRedash, self).__init__(configuration)
         self.syntax = "json"
 
     @classmethod
     def name(cls):
-        return "Redash Endpoint"
+        return "Remote Redash"
 
     @classmethod
     def type(cls):
-        return "redash_endpoint"
+        return "remote_redash"
 
     @classmethod
     def enabled(cls):
@@ -41,7 +41,7 @@ class RedashEndpoint(BaseQueryRunner):
         return
 
     def run_query(self, query, user):
-        logger.debug("RedashEndpoint is about to execute query: %s", query)
+        logger.debug("RemoteRedash is about to execute query: %s", query)
 
         url = f"{self.configuration['url']}/api"
         headers = {"Authorization": f"Key {self.configuration['api_key']}"}
@@ -62,15 +62,15 @@ class RedashEndpoint(BaseQueryRunner):
             while job.get('status', None) != _SUCCESS:
                 if int(time.time()) >= timeout:
                     requests.request("DELETE", poll, headers=headers)
-                    raise Exception(f"Redash Endpoint: TIMEOUT {poll}")
+                    raise Exception(f"Remote Redash: TIMEOUT {poll}")
                 time.sleep(delay)
                 delay *= backoff if delay < 30 else 30
 
                 job = requests.request("GET", poll, headers=headers).json()["job"]
                 if job['status'] == _FAILURE:
-                    raise Exception(f"Redash Endpoint: {job['error']} FAILURE {poll}")
+                    raise Exception(f"Remote Redash: {job['error']} FAILURE {poll}")
                 if job['status'] == _CANCELLED:
-                    raise Exception(f"Redash Endpoint: CANCELLED {poll}")
+                    raise Exception(f"Remote Redash: CANCELLED {poll}")
             result = job['query_result_id']
         else:
             result = response.json()['query_result']['id']
@@ -87,5 +87,5 @@ class RedashEndpoint(BaseQueryRunner):
         return json.dumps(result_data), None
 
 
-register(RedashEndpoint)
+register(RemoteRedash)
 

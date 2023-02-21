@@ -90,7 +90,7 @@ ENV PIP_NO_CACHE_DIR=1
 # rollback pip version to avoid legacy resolver problem
 RUN pip install pip==20.2.4;
 
-COPY ./unixodbc.h /usr/include/unixodbc.h
+# COPY ./unixodbc.h /usr/include/unixodbc.h
 
 # We first copy only the requirements file, to avoid rebuilding on every file change.
 COPY requirements_all_ds.txt ./

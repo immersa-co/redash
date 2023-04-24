@@ -332,3 +332,11 @@ api.add_org_resource(
 api.add_org_resource(
     OrganizationSettings, "/api/settings/organization", endpoint="organization_settings"
 )
+
+from redash.handlers.organization import OrganizationResource, OrganizationListResource
+api.add_org_resource(
+    OrganizationResource, "/api/organization/<slug>", endpoint="organization"
+)
+api.add_org_resource(
+    OrganizationListResource, "/api/organizations", endpoint="organizations"
+)

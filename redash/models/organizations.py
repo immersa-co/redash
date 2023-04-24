@@ -86,3 +86,10 @@ class Organization(TimestampMixin, db.Model):
 
     def has_user(self, email):
         return self.users.filter(User.email == email).count() == 1
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "slug": self.slug
+        }

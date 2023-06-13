@@ -56,7 +56,7 @@ class OrganizationResource(BaseResource):
             groups = models.Group.all(org)
             if groups is not None:
                 for group in groups:
-                    org_fk_constraints = [models.Query, models.QueryResult, models.DataSource, models.Event]
+                    org_fk_constraints = [models.Query, models.QueryResult, models.DataSource, models.Event, models.Dashboard]
                     for org_fk_constraint in org_fk_constraints:
                         constraints = models.db.session.query(org_fk_constraint).filter(
                             org_fk_constraint.org == org)

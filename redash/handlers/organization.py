@@ -56,15 +56,22 @@ class OrganizationResource(BaseResource):
             groups = models.Group.all(org)
             if groups is not None:
                 for group in groups:
+                    org_fk_constraints = [models.Query, models.QueryResult, models.DataSource, models.Event]
+                    for org_fk_constraint in org_fk_constraints:
+                        constraints = models.db.session.query(org_fk_constraint).filter(
+                            org_fk_constraint.org == org)
+                        for constraint in constraints:
+                            models.db.session.delete(constraint)
                     members = models.Group.members(group.id)
                     for member in members:
+                        user_fk_constraints = [models.Change]
+                        for user_fk_constraint in user_fk_constraints:
+                            constraints = models.db.session.query(user_fk_constraint).filter(user_fk_constraint.user == member)
+                            for constraint in constraints:
+                                models.db.session.delete(constraint)
                         models.db.session.delete(member)
                     models.db.session.delete(group)
-            events = models.db.session.query(models.Event).filter(models.Event.org == org)
-            for event in events:
-                models.db.session.delete(event)
             models.db.session.delete(org)
-
             models.db.session.commit()
         else:
             abort(404, message=f"Org '{slug}' not found")

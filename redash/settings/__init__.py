@@ -392,7 +392,8 @@ default_query_runners = [
     "redash.query_runner.firebolt",
     "redash.query_runner.nz",
     "redash.query_runner.arango",
-    "redash.query_runner.remote_redash"
+    "redash.query_runner.remote_redash",
+    "redash.query_runner.s3"
 ]
 
 enabled_query_runners = array_from_string(

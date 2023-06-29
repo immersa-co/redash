@@ -4,7 +4,6 @@ from typing import Tuple, Optional
 from redash.query_runner import *
 from redash.utils import json_dumps, json_loads
 
-
 logger = logging.getLogger(__name__)
 
 ELASTICSEARCH_TYPES_MAPPING = {
@@ -18,7 +17,6 @@ ELASTICSEARCH_TYPES_MAPPING = {
     "object": TYPE_STRING,
 }
 
-
 TYPES_MAP = {
     str: TYPE_STRING,
     int: TYPE_INTEGER,
@@ -28,7 +26,6 @@ TYPES_MAP = {
 
 
 class ElasticSearch2(BaseHTTPQueryRunner):
-
     should_annotate_query = False
 
     @classmethod
@@ -263,7 +260,6 @@ class OpenDistroSQLElasticSearch(ElasticSearch2):
         return "elasticsearch2_OpenDistroSQLElasticSearch"
 
 
-
 class XPackSQLElasticSearch(ElasticSearch2):
 
     def __init__(self, *args, **kwargs):
@@ -326,8 +322,8 @@ class ImmersaSQLElasticSearch(ElasticSearch2):
         sql_query_url = '/_sql'
         return sql_query, sql_query_url, None
 
-    @classmethod
-    def _parse_results(cls, result_fields, raw_result):
+    # @classmethod
+    def _parse_results(self, result_fields, raw_result):
         error = raw_result.get('error')
         if error:
             raise Exception(error)
@@ -343,6 +339,26 @@ class ImmersaSQLElasticSearch(ElasticSearch2):
             'rows': []
         }
         query_results_rows = raw_result['rows']
+        if 'cursor' in raw_result:
+            cursor = raw_result['cursor']
+        else:
+            cursor = None
+
+        while cursor is not None:
+            cursor_query = {"cursor": cursor}
+            response, error = self.get_response(
+                url='/_sql',
+                http_method='post',
+                json=cursor_query
+            )
+
+            rows = response.json()['rows']
+            query_results_rows.extend(rows)
+
+            if 'cursor' in response.json():
+                cursor = response.json()['cursor']
+            else:
+                cursor = None
 
         for query_results_row in query_results_rows:
             result_row = dict()
@@ -358,8 +374,7 @@ class ImmersaSQLElasticSearch(ElasticSearch2):
 
     @classmethod
     def type(cls):
-        return "elasticsearch2_XPackSQLElasticSearch"
-
+        return "elasticsearch2_ImmersaSQLElasticSearch"
 
 
 register(ElasticSearch2)

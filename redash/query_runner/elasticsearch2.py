@@ -312,7 +312,57 @@ class XPackSQLElasticSearch(ElasticSearch2):
         return "elasticsearch2_XPackSQLElasticSearch"
 
 
+class ImmersaSQLElasticSearch(ElasticSearch2):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.syntax = 'sql'
+
+    def _build_query(self, query: str) -> Tuple[dict, str, Optional[list]]:
+        sql_query = {
+            'query': query,
+            'fetch_size': 10000
+        }
+        sql_query_url = '/sql'
+        return sql_query, sql_query_url, None
+
+    @classmethod
+    def _parse_results(cls, result_fields, raw_result):
+        error = raw_result.get('error')
+        if error:
+            raise Exception(error)
+
+        rv = {
+            'columns': [
+                {
+                    'name': c['name'],
+                    'friendly_name': c['name'],
+                    'type': ELASTICSEARCH_TYPES_MAPPING.get(c['type'], 'string')
+                } for c in raw_result['columns']
+            ],
+            'rows': []
+        }
+        query_results_rows = raw_result['rows']
+
+        for query_results_row in query_results_rows:
+            result_row = dict()
+            for column, column_value in zip(rv['columns'], query_results_row):
+                result_row[column['name']] = column_value
+            rv['rows'].append(result_row)
+
+        return rv
+
+    @classmethod
+    def name(cls):
+        return cls.__name__
+
+    @classmethod
+    def type(cls):
+        return "elasticsearch2_XPackSQLElasticSearch"
+
+
 
 register(ElasticSearch2)
 register(OpenDistroSQLElasticSearch)
 register(XPackSQLElasticSearch)
+register(ImmersaSQLElasticSearch)

@@ -10,7 +10,7 @@ scheduler() {
 dev_scheduler() {
   echo "Starting dev RQ scheduler..."
 
-  exec watchmedo auto-restart --directory=./redash/ --pattern=*.py --recursive -- ./manage.py rq scheduler
+  exec ./manage.py rq scheduler
 }
 
 worker() {
@@ -25,7 +25,7 @@ worker() {
 dev_worker() {
   echo "Starting dev RQ worker..."
 
-  exec watchmedo auto-restart --directory=./redash/ --pattern=*.py --recursive -- ./manage.py rq worker $QUEUES
+  exec ./manage.py rq worker $QUEUES
 }
 
 server() {

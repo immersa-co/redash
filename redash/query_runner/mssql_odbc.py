@@ -17,7 +17,7 @@ except ImportError:
 
 
 class SQLServerODBC(BaseSQLQueryRunner):
-    should_annotate_query = False
+    should_annotate_query = True
     noop_query = "SELECT 1"
 
     @classmethod

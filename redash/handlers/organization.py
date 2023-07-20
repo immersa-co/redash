@@ -64,7 +64,7 @@ class OrganizationResource(BaseResource):
                             models.db.session.delete(constraint)
                     members = models.Group.members(group.id)
                     for member in members:
-                        user_fk_constraints = [models.Change]
+                        user_fk_constraints = [models.Change, models.Favorite]
                         for user_fk_constraint in user_fk_constraints:
                             constraints = models.db.session.query(user_fk_constraint).filter(user_fk_constraint.user == member)
                             for constraint in constraints:

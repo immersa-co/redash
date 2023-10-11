@@ -70,18 +70,38 @@ class Prometheus(BaseQueryRunner):
     def configuration_schema(cls):
         return {
             "type": "object",
-            "properties": {"url": {"type": "string", "title": "Prometheus API URL"}},
-            "required": ["url"],
+            "properties": {"url": {"type": "string", "title": "Prometheus API URL"},
+                           "user": {"type": "string"},
+                           "password": {"type": "string"},
+                           },
+            "order": ["url", "user", "password"],
+            "secret": ["password"],
+            "required": ["url"]
         }
 
+    def get_connection_auth(self):
+        from redash import settings
+        auth = None
+        user = self.configuration.get("user", None)
+        password = self.configuration.get("password", None)
+        client_cert_path = settings.dynamic_settings.private_client_cert()
+        self_signed_ca_bundle_path = settings.dynamic_settings.self_signed_ca_bundle_path()
+        if user and password:
+            auth = (user, password)
+        return auth, client_cert_path, self_signed_ca_bundle_path
+
     def test_connection(self):
-        resp = requests.get(self.configuration.get("url", None))
+        auth, client_cert_path, self_signed_ca_bundle_path = self.get_connection_auth()
+        resp = requests.get(self.configuration.get("url", None), auth=auth, cert=client_cert_path,
+                            verify=self_signed_ca_bundle_path)
         return resp.ok
 
     def get_schema(self, get_stats=False):
         base_url = self.configuration["url"]
         metrics_path = "/api/v1/label/__name__/values"
-        response = requests.get(base_url + metrics_path)
+        auth, client_cert_path, self_signed_ca_bundle_path = self.get_connection_auth()
+        response = requests.get(base_url + metrics_path, auth=auth, cert=client_cert_path,
+                            verify=self_signed_ca_bundle_path)
         response.raise_for_status()
         data = response.json()["data"]
 
@@ -135,8 +155,9 @@ class Prometheus(BaseQueryRunner):
             convert_query_range(payload)
 
             api_endpoint = base_url + "/api/v1/{}".format(query_type)
-
-            response = requests.get(api_endpoint, params=payload)
+            auth, client_cert_path, self_signed_ca_bundle_path = self.get_connection_auth()
+            response = requests.get(api_endpoint, params=payload, auth=auth, cert=client_cert_path,
+                                    verify=self_signed_ca_bundle_path)
             response.raise_for_status()
 
             metrics = response.json()["data"]["result"]

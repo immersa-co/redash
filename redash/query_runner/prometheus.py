@@ -5,7 +5,9 @@ from dateutil import parser
 from urllib.parse import parse_qs
 from redash.query_runner import BaseQueryRunner, register, TYPE_DATETIME, TYPE_STRING
 from redash.utils import json_dumps
-
+from base64 import b64decode
+from tempfile import NamedTemporaryFile
+import os
 
 def get_instant_rows(metrics_data):
     rows = []
@@ -63,6 +65,31 @@ def convert_query_range(payload):
     payload.update(query_range)
 
 
+def _create_cert_file(configuration, file_key, mtls_config):
+    if file_key in configuration:
+        with NamedTemporaryFile(mode="w", delete=False) as cert_file:
+            cert_bytes = b64decode(configuration[file_key])
+            cert_file.write(cert_bytes.decode("utf-8"))
+        mtls_config[file_key] = cert_file.name
+
+
+def _cleanup_mtls_certs(mtls_config):
+    for k, v in mtls_config.items():
+        if k != "mtls":
+            os.remove(v)
+
+
+def _get_mtls_config(configuration):
+    use_mtls = configuration.get("mtls", "disable")
+    if use_mtls == "require":
+        mtls_config = {"mtls": use_mtls}
+        _create_cert_file(configuration, "keyFile", mtls_config)
+        _create_cert_file(configuration, "crtFile", mtls_config)
+        _create_cert_file(configuration, "ca_crtFile", mtls_config)
+        return mtls_config
+    else:
+        return None
+
 class Prometheus(BaseQueryRunner):
     should_annotate_query = False
 
@@ -71,44 +98,76 @@ class Prometheus(BaseQueryRunner):
         return {
             "type": "object",
             "properties": {"url": {"type": "string", "title": "Prometheus API URL"},
-                           "user": {"type": "string"},
-                           "password": {"type": "string"},
+                           "mtls": {
+                               "type": "string",
+                               "title": "Use mTLS",
+                               "default": "prefer",
+                               "extendedEnum": [
+                                   {"value": "disable", "name": "Disable"},
+                                   {"value": "require", "name": "Require"},
+                               ],
                            },
-            "order": ["url", "user", "password"],
-            "secret": ["password"],
-            "required": ["url"]
+                           "user": {"type": "string", "title": "Username for Authentication"},
+                           "password": {"type": "string", "title": "Password for Authentication"},
+                           "keyFile": {"type": "string", "title": "Private Key to use with mtls Auth"},
+                           "crtFile": {"type": "string", "title": "Signed certificate to use with  mtls Auth"},
+                           "ca_crtFile": {"type": "string", "title": "Cert Authority Certificate to use with mtls Auth"}
+            },
+            "order": ["url", "user", "password", "mtls", "keyFile", "crtFile", "ca_crtFile"],
+            "secret": ["password", "keyFile", "crtFile", "ca_crtFile"],
+            "required": ["url"],
+            "extra_options": [
+                "mtls",
+                "keyFile",
+                "crtFile",
+                "ca_crtFile",
+            ],
         }
 
     def get_connection_auth(self):
-        from redash import settings
         auth = None
         user = self.configuration.get("user", None)
         password = self.configuration.get("password", None)
-        client_cert_path = settings.dynamic_settings.private_client_cert()
-        self_signed_ca_bundle_path = settings.dynamic_settings.self_signed_ca_bundle_path()
         if user and password:
             auth = (user, password)
-        return auth, client_cert_path, self_signed_ca_bundle_path
+
+        mtls_config = _get_mtls_config(self.configuration)
+        if mtls_config:
+            cert = (mtls_config['crtFile'], mtls_config['keyFile'])
+            verify = mtls_config['ca_crtFile']
+        else:
+            cert = None
+            verify = None
+
+        return auth, cert, verify, mtls_config
 
     def test_connection(self):
-        auth, client_cert_path, self_signed_ca_bundle_path = self.get_connection_auth()
-        resp = requests.get(self.configuration.get("url", None), auth=auth, cert=client_cert_path,
-                            verify=self_signed_ca_bundle_path)
+        auth, cert, verify, mtls_config = self.get_connection_auth()
+        try:
+            resp = requests.get(self.configuration.get("url", None), auth=auth, cert=cert, verify=verify)
+        except Exception as e:
+            raise Exception(f"Exception in validating Prometheus connector {e}") from e
+        finally:
+            _cleanup_mtls_certs(mtls_config)
         return resp.ok
 
     def get_schema(self, get_stats=False):
         base_url = self.configuration["url"]
         metrics_path = "/api/v1/label/__name__/values"
-        auth, client_cert_path, self_signed_ca_bundle_path = self.get_connection_auth()
-        response = requests.get(base_url + metrics_path, auth=auth, cert=client_cert_path,
-                            verify=self_signed_ca_bundle_path)
-        response.raise_for_status()
-        data = response.json()["data"]
+        auth, cert, verify, mtls_config = self.get_connection_auth()
+        try:
+            response = requests.get(base_url + metrics_path, auth=auth, cert=cert, verify=verify)
+            response.raise_for_status()
+            data = response.json()["data"]
 
-        schema = {}
-        for name in data:
-            schema[name] = {"name": name, "columns": []}
-        return list(schema.values())
+            schema = {}
+            for name in data:
+                schema[name] = {"name": name, "columns": []}
+            return list(schema.values())
+        except Exception as e:
+            raise Exception(f"Exception in getting schema from Prometheus connector {e}") from e
+        finally:
+            _cleanup_mtls_certs(mtls_config)
 
     def run_query(self, query, user):
         """
@@ -155,9 +214,9 @@ class Prometheus(BaseQueryRunner):
             convert_query_range(payload)
 
             api_endpoint = base_url + "/api/v1/{}".format(query_type)
-            auth, client_cert_path, self_signed_ca_bundle_path = self.get_connection_auth()
-            response = requests.get(api_endpoint, params=payload, auth=auth, cert=client_cert_path,
-                                    verify=self_signed_ca_bundle_path)
+            auth, cert, verify, mtls_config = self.get_connection_auth()
+
+            response = requests.get(api_endpoint, params=payload, auth=auth, cert=cert, verify=verify)
             response.raise_for_status()
 
             metrics = response.json()["data"]["result"]
@@ -185,6 +244,8 @@ class Prometheus(BaseQueryRunner):
 
         except requests.RequestException as e:
             return None, str(e)
+        finally:
+            _cleanup_mtls_certs(mtls_config)
 
         return json_data, error
 

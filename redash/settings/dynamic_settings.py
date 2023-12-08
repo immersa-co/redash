@@ -41,6 +41,25 @@ def ssh_tunnel_auth():
     }
 
 
+def private_client_cert():
+    """
+    To enable data source connections via mtls, provide your Certificate here. Return a string
+    pointing at your **private** key's path.
+    """
+    return {
+        'client_cert_path': '/app/immersa/keys/immersa_redash.crt'
+    }
+
+
+def ca_bundle_path():
+    """
+    To enable accepting private CAs we need to add the path to the CA bundle here.
+    """
+    return {
+        'client_cert_path': '/app/immersa/keys/immersa_ca_bundle.pem'
+    }
+
+
 def database_key_definitions(default):
     """
     All primary/foreign keys in Redash are of type `db.Integer` by default.
@@ -58,6 +77,6 @@ def database_key_definitions(default):
 
     return definitions
 
-# Since you can define custom primary key types using `database_key_definitions`, you may want to load certain extensions when creating the database. 
+# Since you can define custom primary key types using `database_key_definitions`, you may want to load certain extensions when creating the database.
 # To do so, simply add the name of the extension you'd like to load to this list.
 database_extensions = []

@@ -21,7 +21,7 @@ import routes from "@/services/routes";
 export function DataSourcesListComponent({ dataSources, onClickCreate }) {
   const items = dataSources.map(dataSource => ({
     title: dataSource.name,
-    imgSrc: `${IMG_ROOT}/${dataSource.type}.png`,
+    imgSrc: `${IMG_ROOT}/${dataSource.type && dataSource.type.includes('lo_') ? 'lo_icon' : dataSource.type}.png`,
     href: `data_sources/${dataSource.id}`,
   }));
 

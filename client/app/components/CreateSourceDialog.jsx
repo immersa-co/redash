@@ -105,10 +105,11 @@ class CreateSourceDialog extends React.Component {
     const { selectedType } = this.state;
     const fields = helper.getFields(selectedType);
     const helpTriggerType = `${helpTriggerPrefix}${toUpper(selectedType.type)}`;
+    const ds_image = selectedType && selectedType.type.includes('lo_') ? 'lo_icon':selectedType.type;
     return (
       <div>
         <div className="d-flex justify-content-center align-items-center">
-          <img className="p-5" src={`${imageFolder}/${selectedType.type}.png`} alt={selectedType.name} width="48" />
+          <img className="p-5" src={`${imageFolder}/${ds_image}.png`} alt={selectedType.name} width="48" />
           <h4 className="m-0">{selectedType.name}</h4>
         </div>
         <div className="text-right">
@@ -135,11 +136,12 @@ class CreateSourceDialog extends React.Component {
 
   renderItem(item) {
     const { imageFolder } = this.props;
+    const ds_image = item.type && item.type.includes('lo_') ? 'lo_icon':item.type;
     return (
       <List.Item className="p-l-10 p-r-10 clickable" onClick={() => this.selectType(item)}>
         <PreviewCard
           title={item.name}
-          imageUrl={`${imageFolder}/${item.type}.png`}
+          imageUrl={`${imageFolder}/${ds_image}.png`}
           roundedImage={false}
           data-test="PreviewItem"
           data-test-type={item.type}>

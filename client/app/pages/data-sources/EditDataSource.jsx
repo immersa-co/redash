@@ -114,7 +114,7 @@ class EditDataSource extends React.Component {
       feedbackIcons: true,
       defaultShowExtraFields: helper.hasFilledExtraField(type, dataSource),
     };
-
+    const ds_image_name = (type.type && type.type.includes('lo_')) ? 'lo_icon' : type.type
     return (
       <div className="row" data-test="DataSource">
         <div className="text-right m-r-10">
@@ -126,7 +126,7 @@ class EditDataSource extends React.Component {
           )}
         </div>
         <div className="text-center m-b-10">
-          <img className="p-5" src={`${IMG_ROOT}/${type.type}.png`} alt={type.name} width="64" />
+          <img className="p-5" src={`${IMG_ROOT}/${ds_image_name}.png`} alt={type.name} width="64" />
           <h3 className="m-0">{type.name}</h3>
         </div>
         <div className="col-md-4 col-md-offset-4 m-b-10">

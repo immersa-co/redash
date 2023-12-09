@@ -69,7 +69,9 @@ UserPreviewCard.defaultProps = {
 // DataSourcePreviewCard
 
 export function DataSourcePreviewCard({ dataSource, withLink, children, ...props }) {
-  const imageUrl = `/static/images/db-logos/${dataSource.type}.png`;
+
+  const ds_image_name = (dataSource.type && dataSource.type.includes('lo_')) ? 'lo_icon' : dataSource.type
+  const imageUrl = `/static/images/db-logos/${ds_image_name}.png`;
   const title = withLink ? <Link href={"data_sources/" + dataSource.id}>{dataSource.name}</Link> : dataSource.name;
   return (
     <PreviewCard {...props} imageUrl={imageUrl} title={title}>

@@ -14,6 +14,7 @@ class LOConnectorDSType(e.Enum):
     MARKETO = "lo_marketo"
     FULLSTORY = "lo_fullstory"
     ANALYTICS_WORKSPACE = "lo_analytics_workspace"
+    CHARGEBEE = "lo_chargebee"
 
 
 class LiveopsDatasource(BaseQueryRunner):
@@ -205,6 +206,16 @@ class LOAnalyticsWorkspace(LiveopsDatasource):
         return LOConnectorDSType.ANALYTICS_WORKSPACE.value
 
 
+class LOChargebee(LiveopsDatasource):
+    @classmethod
+    def name(cls):
+        return "LOChargebee"
+
+    @classmethod
+    def type(cls):
+        return LOConnectorDSType.CHARGEBEE.value
+
+
 register(LOMarketo)
 register(LOGoogleSheet)
 register(LORedash)
@@ -213,3 +224,4 @@ register(LOPendo)
 register(LOMixpanel)
 register(LOFullstory)
 register(LOAnalyticsWorkspace)
+register(LOChargebee)

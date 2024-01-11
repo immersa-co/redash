@@ -30,9 +30,10 @@ class RemoteRedash(BaseQueryRunner):
             "type": "object",
             "properties": {
                 "url": {"type": "string", "title": "Redash URL"},
+                "query_id": {"type": "string", "title": "Query Id"},
                 "api_key": {"type": "string", "title": "User API Key"},
             },
-            "order": ["url", "api_key"],
+            "order": ["url", "query_id", "api_key"],
             "required": ["url", "api_key"],
             "secret": ["api_key"],
         }
@@ -88,4 +89,3 @@ class RemoteRedash(BaseQueryRunner):
 
 
 register(RemoteRedash)
-

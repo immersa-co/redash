@@ -104,6 +104,8 @@ RUN pip install -r requirements.txt
 
 COPY --chown=redash . /app
 COPY --from=frontend-builder --chown=redash /frontend/client/dist /app/client/dist
+COPY redash/immersa-db-logos /app/client/dist/images/db-logos
+
 RUN chown redash /app
 USER redash
 

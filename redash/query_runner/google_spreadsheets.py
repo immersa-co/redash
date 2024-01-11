@@ -166,9 +166,16 @@ class GoogleSpreadsheet(BaseQueryRunner):
     def configuration_schema(cls):
         return {
             "type": "object",
-            "properties": {"jsonKeyFile": {"type": "string", "title": "JSON Key File"}},
-            "required": ["jsonKeyFile"],
+            "properties": {
+                "spreadsheet_id": {"type": "string", "title": "Spread Sheet Id"},
+                "jsonKeyFile": {"type": "string", "title": "JSON Key File"}
+            },
+            "order": ["spreadsheet_id", "jsonKeyFile"],
+            "required": ["spreadsheet_id", "jsonKeyFile"],
             "secret": ["jsonKeyFile"],
+            "extra_options": [
+                "jsonKeyFile"
+            ],
         }
 
     def _get_spreadsheet_service(self):

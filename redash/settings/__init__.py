@@ -394,8 +394,8 @@ default_query_runners = [
     "redash.query_runner.arango",
     "redash.query_runner.remote_redash",
     "redash.query_runner.s3",
-    "redash.query_runner.immersa_ds_custom",
-    "redash.query_runner.immersa_ds_oauth"
+    "redash.query_runner.connector_ds_oauth",
+    "redash.query_runner.connector_ds_custom"
 ]
 
 enabled_query_runners = array_from_string(

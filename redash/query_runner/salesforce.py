@@ -188,4 +188,4 @@ class Salesforce(BaseQueryRunner):
         return list(schema.values())
 
 
-register(Salesforce)
+# register(Salesforce)

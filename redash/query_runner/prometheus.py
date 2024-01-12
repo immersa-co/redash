@@ -101,7 +101,7 @@ class Prometheus(BaseQueryRunner):
                            "mtls": {
                                "type": "string",
                                "title": "Use mTLS",
-                               "default": "prefer",
+                               "default": "disable",
                                "extendedEnum": [
                                    {"value": "disable", "name": "Disable"},
                                    {"value": "require", "name": "Require"},

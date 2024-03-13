@@ -100,6 +100,14 @@ function getFields(type = {}, target = { options: {} }) {
       placeholder: `My ${type.name}`,
       autoFocus: isNewTarget,
     },
+    {
+      name: "sync_paused",
+      title: "Pause Sync",
+      type: "checkbox",
+      required: false,
+      initialValue: false,
+      contentAfter: React.createElement("hr"),
+    },
     ...orderedInputs(configurationSchema.properties, configurationSchema.order, target.options),
   ];
 

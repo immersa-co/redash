@@ -134,6 +134,10 @@ class BaseQueryRunner(object):
     def type(cls):
         return cls.__name__.lower()
 
+    @property
+    def sync_paused(self):
+        return self.sync_paused
+
     @classmethod
     def enabled(cls):
         return True

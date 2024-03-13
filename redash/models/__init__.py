@@ -90,6 +90,7 @@ class DataSource(BelongsToOrgMixin, db.Model):
 
     name = Column(db.String(255))
     type = Column(db.String(255))
+    sync_paused = Column(db.Boolean, default=False)
     options = Column(
         "encrypted_options",
         ConfigurationContainer.as_mutable(
@@ -119,6 +120,7 @@ class DataSource(BelongsToOrgMixin, db.Model):
             "id": self.id,
             "name": self.name,
             "type": self.type,
+            "sync_paused": self.sync_paused,
             "syntax": self.query_runner.syntax,
             "paused": self.paused,
             "pause_reason": self.pause_reason,

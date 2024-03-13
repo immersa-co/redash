@@ -100,6 +100,14 @@ function getFields(type = {}, target = { options: {} }) {
       placeholder: `My ${type.name}`,
       autoFocus: isNewTarget,
     },
+    {
+      name: "sync_paused",
+      title: "Pause Sync",
+      type: "checkbox",
+      required: false,
+      initialValue: target.sync_paused,
+      contentAfter: React.createElement("hr"),
+    },
     ...orderedInputs(configurationSchema.properties, configurationSchema.order, target.options),
   ];
 
@@ -108,8 +116,9 @@ function getFields(type = {}, target = { options: {} }) {
 
 function updateTargetWithValues(target, values) {
   target.name = values.name;
+  target.sync_paused = values.sync_paused;
   Object.keys(values).forEach(key => {
-    if (key !== "name") {
+    if (key !== "name" && key !== "sync_paused") {
       target.options[key] = values[key];
     }
   });

@@ -105,7 +105,7 @@ function getFields(type = {}, target = { options: {} }) {
       title: "Pause Sync",
       type: "checkbox",
       required: false,
-      initialValue: false,
+      initialValue: target.sync_paused,
       contentAfter: React.createElement("hr"),
     },
     ...orderedInputs(configurationSchema.properties, configurationSchema.order, target.options),

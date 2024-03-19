@@ -165,8 +165,8 @@ class DataSourceListResource(BaseResource):
 
         try:
             datasource = models.DataSource.create_with_group(
-                org=self.current_org, name=req["name"], type=req["type"],
-                sync_paused=req["sync_paused"], export_paused=req["export_paused"], options=config
+                org=self.current_org, name=req["name"], type=req["type"], sync_paused=req.get("sync_paused", False),
+                export_paused=req.get("export_paused", True), options=config
             )
 
             models.db.session.commit()

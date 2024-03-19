@@ -138,6 +138,10 @@ class BaseQueryRunner(object):
     def sync_paused(self):
         return self.sync_paused
 
+    @property
+    def export_paused(self):
+        return self.export_paused
+
     @classmethod
     def enabled(cls):
         return True

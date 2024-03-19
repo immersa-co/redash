@@ -74,6 +74,7 @@ class DataSourceResource(BaseResource):
         data_source.type = req["type"]
         data_source.name = req["name"]
         data_source.sync_paused = req["sync_paused"]
+        data_source.export_paused = req["export_paused"]
         models.db.session.add(data_source)
 
         try:
@@ -164,7 +165,8 @@ class DataSourceListResource(BaseResource):
 
         try:
             datasource = models.DataSource.create_with_group(
-                org=self.current_org, name=req["name"], type=req["type"], sync_paused=req["sync_paused"], options=config
+                org=self.current_org, name=req["name"], type=req["type"], sync_paused=req.get("sync_paused", False),
+                export_paused=req.get("export_paused", True), options=config
             )
 
             models.db.session.commit()

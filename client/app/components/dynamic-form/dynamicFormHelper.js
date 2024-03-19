@@ -104,8 +104,17 @@ function getFields(type = {}, target = { options: {} }) {
       name: "sync_paused",
       title: "Pause Sync",
       type: "checkbox",
-      required: false,
-      initialValue: target.sync_paused,
+      required: true,
+      initialValue: typeof target.sync_paused === 'undefined' ? false : target.sync_paused,
+      defaultValue: false,
+    },
+    {
+      name: "export_paused",
+      title: "Pause Export",
+      type: "checkbox",
+      required: true,
+      initialValue: typeof target.export_paused === 'undefined' ? true : target.export_paused,
+      defaultValue: true,
       contentAfter: React.createElement("hr"),
     },
     ...orderedInputs(configurationSchema.properties, configurationSchema.order, target.options),
@@ -117,8 +126,9 @@ function getFields(type = {}, target = { options: {} }) {
 function updateTargetWithValues(target, values) {
   target.name = values.name;
   target.sync_paused = values.sync_paused;
+  target.export_paused = values.export_paused;
   Object.keys(values).forEach(key => {
-    if (key !== "name" && key !== "sync_paused") {
+    if (key !== "name" && key !== "sync_paused" && key !== "export_paused") {
       target.options[key] = values[key];
     }
   });

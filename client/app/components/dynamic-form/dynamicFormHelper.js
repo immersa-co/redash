@@ -105,7 +105,7 @@ function getFields(type = {}, target = { options: {} }) {
       title: "Pause Sync",
       type: "checkbox",
       required: true,
-      initialValue: target.sync_paused,
+      initialValue: typeof target.sync_paused === 'undefined' ? false : target.sync_paused,
       defaultValue: false,
     },
     {
@@ -113,7 +113,7 @@ function getFields(type = {}, target = { options: {} }) {
       title: "Pause Export",
       type: "checkbox",
       required: true,
-      initialValue: target.export_paused,
+      initialValue: typeof target.export_paused === 'undefined' ? true : target.export_paused,
       defaultValue: true,
       contentAfter: React.createElement("hr"),
     },

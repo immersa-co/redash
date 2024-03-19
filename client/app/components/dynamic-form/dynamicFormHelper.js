@@ -124,6 +124,7 @@ function getFields(type = {}, target = { options: {} }) {
 function updateTargetWithValues(target, values) {
   target.name = values.name;
   target.sync_paused = values.sync_paused;
+  target.export_paused = values.export_paused;
   Object.keys(values).forEach(key => {
     if (key !== "name" && key !== "sync_paused" && key !== "export_paused") {
       target.options[key] = values[key];

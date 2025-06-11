@@ -41,7 +41,7 @@ class Snowflake(BaseQueryRunner):
             "properties": {
                 "account": {"type": "string"},
                 "user": {"type": "string"},
-                "password": {"type": "string"},
+                "private_key": {"type": "string"},
                 "warehouse": {"type": "string"},
                 "database": {"type": "string"},
                 "region": {"type": "string", "default": "us-west"},
@@ -55,14 +55,14 @@ class Snowflake(BaseQueryRunner):
             "order": [
                 "account",
                 "user",
-                "password",
+                "private_key",
                 "warehouse",
                 "database",
                 "region",
                 "host",
             ],
-            "required": ["user", "password", "account", "database", "warehouse"],
-            "secret": ["password"],
+            "required": ["user", "private_key", "account", "database", "warehouse"],
+            "secret": ["private_key"],
             "extra_options": [
                 "host",
             ],
@@ -97,7 +97,7 @@ class Snowflake(BaseQueryRunner):
 
         connection = snowflake.connector.connect(
             user=self.configuration["user"],
-            password=self.configuration["password"],
+            private_key=self.configuration["private_key"],
             account=account,
             region=region,
             host=host,
